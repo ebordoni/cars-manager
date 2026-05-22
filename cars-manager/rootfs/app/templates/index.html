@@ -1,0 +1,252 @@
+{% extends "base.html" %} {% block title %}Dashboard – Cars Manager{% endblock
+%} {% block content %}
+<div class="page-header d-flex justify-content-between align-items-start">
+  <div>
+    <h1><i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard</h1>
+    <p>Benvenuto nel tuo garage digitale</p>
+  </div>
+  <a href="{{ url_for('cars.new_car') }}" class="btn btn-primary">
+    <i class="bi bi-plus-lg me-1"></i> Aggiungi auto
+  </a>
+</div>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card h-100 p-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+          <i class="bi bi-car-front"></i>
+        </div>
+        <div>
+          <div class="stat-value text-primary">{{ stats.total_cars }}</div>
+          <div class="stat-label">Auto in garage</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card h-100 p-3" style="border-left-color: #dc3545">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div>
+          <div class="stat-value text-danger">
+            {{ stats.open_malfunctions }}
+          </div>
+          <div class="stat-label">Guasti aperti</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card h-100 p-3" style="border-left-color: #fd7e14">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+          <i class="bi bi-calendar-event"></i>
+        </div>
+        <div>
+          <div class="stat-value text-warning">
+            {{ stats.pending_maintenance }}
+          </div>
+          <div class="stat-label">Scadenze pendenti</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card h-100 p-3" style="border-left-color: #198754">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-success bg-opacity-10 text-success">
+          <i class="bi bi-folder2"></i>
+        </div>
+        <div>
+          <div class="stat-value text-success">{{ stats.total_documents }}</div>
+          <div class="stat-label">Documenti archiviati</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if stats.overdue_maintenance > 0 %}
+<div class="alert alert-danger d-flex align-items-center mb-4">
+  <i class="bi bi-exclamation-octagon-fill me-2 fs-5"></i>
+  <span>
+    <strong>Attenzione!</strong> Hai
+    <strong>{{ stats.overdue_maintenance }}</strong>
+    scadenz{{ 'a scaduta' if stats.overdue_maintenance == 1 else 'e scadute' }}!
+    <a
+      href="{{ url_for('maintenance.list_maintenance', status='overdue') }}"
+      class="alert-link ms-1"
+      >Visualizza &rarr;</a
+    >
+  </span>
+</div>
+{% endif %}
+
+<div class="row g-4">
+  <!-- Upcoming maintenance -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div
+        class="card-header bg-white d-flex justify-content-between align-items-center py-3"
+      >
+        <h6 class="mb-0 fw-semibold">
+          <i class="bi bi-calendar-check text-primary me-2"></i>Prossime
+          scadenze (60 giorni)
+        </h6>
+        <a
+          href="{{ url_for('maintenance.list_maintenance') }}"
+          class="btn btn-sm btn-outline-primary"
+          >Tutte</a
+        >
+      </div>
+      <div class="card-body p-0">
+        {% if upcoming %}
+        <ul class="list-group list-group-flush">
+          {% for ev in upcoming %}
+          <li
+            class="list-group-item d-flex justify-content-between align-items-center py-3"
+          >
+            <div>
+              <div class="fw-semibold">{{ ev.title }}</div>
+              <small class="text-muted"
+                >{{ ev.make }} {{ ev.model }} {% if ev.license_plate %}· {{
+                ev.license_plate }}{% endif %}
+              </small>
+            </div>
+            <div class="text-end">
+              {% if ev.days_remaining is not none and ev.days_remaining <= 7 %}
+              <span class="badge badge-overdue rounded-pill"
+                >{{ ev.due_date }}</span
+              >
+              {% else %}
+              <span class="badge badge-pending rounded-pill"
+                >{{ ev.due_date }}</span
+              >
+              {% endif %} {% if ev.days_remaining is not none %}
+              <div class="text-muted" style="font-size: 0.72rem">
+                {% if ev.days_remaining == 0 %}oggi {% elif ev.days_remaining ==
+                1 %}domani {% else %}tra {{ ev.days_remaining }} giorni{% endif
+                %}
+              </div>
+              {% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-center text-muted py-4">
+          <i class="bi bi-check-circle fs-3 text-success"></i>
+          <p class="mt-2 mb-0">Nessuna scadenza imminente</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Open malfunctions -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div
+        class="card-header bg-white d-flex justify-content-between align-items-center py-3"
+      >
+        <h6 class="mb-0 fw-semibold">
+          <i class="bi bi-exclamation-triangle text-danger me-2"></i>Guasti
+          aperti
+        </h6>
+        <a
+          href="{{ url_for('malfunctions.list_malfunctions', status='open') }}"
+          class="btn btn-sm btn-outline-danger"
+          >Tutti</a
+        >
+      </div>
+      <div class="card-body p-0">
+        {% if open_faults %}
+        <ul class="list-group list-group-flush">
+          {% for f in open_faults %}
+          <li
+            class="list-group-item d-flex justify-content-between align-items-center py-3"
+          >
+            <div>
+              <div class="fw-semibold">{{ f.title }}</div>
+              <small class="text-muted"
+                >{{ f.make }} {{ f.model }} · {{ f.date_reported }}</small
+              >
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span
+                class="badge severity-{{ f.severity }} rounded-pill text-capitalize"
+                >{{ f.severity }}</span
+              >
+              <a
+                href="{{ url_for('malfunctions.malfunction_detail', malfunction_id=f.id) }}"
+                class="btn btn-sm btn-light"
+              >
+                <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-center text-muted py-4">
+          <i class="bi bi-check-circle fs-3 text-success"></i>
+          <p class="mt-2 mb-0">Nessun guasto aperto</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cars quick access -->
+{% if cars %}
+<div class="mt-4">
+  <h6 class="fw-semibold mb-3">
+    <i class="bi bi-car-front me-2"></i>Le tue auto
+  </h6>
+  <div class="row g-3">
+    {% for car in cars %}
+    <div class="col-sm-6 col-lg-4 col-xl-3">
+      <a
+        href="{{ url_for('cars.car_detail', car_id=car.id) }}"
+        class="text-decoration-none"
+      >
+        <div class="card car-card p-3 h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="car-icon"><i class="bi bi-car-front-fill"></i></div>
+            <div class="flex-grow-1 min-w-0">
+              <div class="fw-bold text-truncate">
+                {{ car.make }} {{ car.model }}
+              </div>
+              <div class="text-muted small">
+                {{ car.year or '—' }} · {{ car.license_plate or '—' }}
+              </div>
+              {% if car.current_mileage %}
+              <div class="text-muted small">
+                <i class="bi bi-speedometer me-1"></i>{{
+                '{:,}'.format(car.current_mileage) }} km
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% if car.pending_maintenance or car.open_malfunctions %}
+          <div class="d-flex gap-2 mt-2">
+            {% if car.pending_maintenance %}<span class="badge badge-pending"
+              >{{ car.pending_maintenance }} scadenze</span
+            >{% endif %} {% if car.open_malfunctions %}<span
+              class="badge badge-open"
+              >{{ car.open_malfunctions }} guasti</span
+            >{% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %} {% endblock %}

@@ -1,0 +1,41 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Home Assistant Add-on: Cars Manager
+# Run script for the Cars Manager service
+# ==============================================================================
+
+bashio::log.info "Starting Cars Manager..."
+
+# Create data directories if they don't exist
+mkdir -p /data/uploads/documents
+
+# Export SMTP configuration from addon options
+if bashio::config.has_value "smtp_server"; then
+    export SMTP_SERVER="$(bashio::config 'smtp_server')"
+fi
+
+if bashio::config.has_value "smtp_port"; then
+    export SMTP_PORT="$(bashio::config 'smtp_port')"
+fi
+
+if bashio::config.has_value "smtp_username"; then
+    export SMTP_USERNAME="$(bashio::config 'smtp_username')"
+fi
+
+if bashio::config.has_value "smtp_password"; then
+    export SMTP_PASSWORD="$(bashio::config 'smtp_password')"
+fi
+
+if bashio::config.has_value "smtp_from"; then
+    export SMTP_FROM="$(bashio::config 'smtp_from')"
+fi
+
+if bashio::config.has_value "smtp_use_tls"; then
+    export SMTP_USE_TLS="$(bashio::config 'smtp_use_tls')"
+fi
+
+bashio::log.info "Cars Manager is ready on port 5000"
+
+# Start the Flask application
+cd /app
+exec python3 -u main.py

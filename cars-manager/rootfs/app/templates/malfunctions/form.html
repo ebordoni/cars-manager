@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% set is_edit = item.get('id') %}
+{% block title %}{{ 'Modifica segnalazione' if is_edit else 'Segnala guasto' }} – Cars Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+      <li class="breadcrumb-item"><a href="{{ url_for('malfunctions.list_malfunctions') }}">Guasti</a></li>
+      {% if is_edit %}
+      <li class="breadcrumb-item">
+        <a href="{{ url_for('malfunctions.malfunction_detail', malfunction_id=item.id) }}">{{ item.title }}</a>
+      </li>
+      {% endif %}
+      <li class="breadcrumb-item active">{{ 'Modifica' if is_edit else 'Segnala' }}</li>
+    </ol>
+  </nav>
+  <h1>{{ 'Modifica segnalazione' if is_edit else 'Segnala un guasto' }}</h1>
+</div>
+
+<div class="row">
+  <div class="col-lg-7 col-xl-5">
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Auto <span class="text-danger">*</span></label>
+            <select name="car_id" class="form-select" required {{ 'disabled' if is_edit }}>
+              <option value="">— Seleziona —</option>
+              {% for car in cars %}
+              <option value="{{ car.id }}"
+                {{ 'selected' if item.get('car_id')|string == car.id|string }}>
+                {{ car.make }} {{ car.model }}
+                {% if car.license_plate %}({{ car.license_plate }}){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+            {% if is_edit %}
+            <input type="hidden" name="car_id" value="{{ item.car_id }}">
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Titolo <span class="text-danger">*</span></label>
+            <input type="text" name="title" class="form-control" required
+                   value="{{ item.get('title', '') }}"
+                   placeholder="Es. Spia motore accesa, Freni che stridono...">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Descrizione</label>
+            <textarea name="description" class="form-control" rows="4"
+                      placeholder="Descrivi nel dettaglio il problema riscontrato...">{{ item.get('description', '') }}</textarea>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Gravità</label>
+              <select name="severity" class="form-select">
+                {% for val, label in severity_labels.items() %}
+                <option value="{{ val }}" {{ 'selected' if item.get('severity', 'medium') == val }}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Data segnalazione</label>
+              <input type="date" name="date_reported" class="form-control"
+                     value="{{ item.get('date_reported', '') }}">
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-danger px-4">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              {{ 'Salva modifiche' if is_edit else 'Segnala guasto' }}
+            </button>
+            <a href="{{ url_for('malfunctions.malfunction_detail', malfunction_id=item.id) if is_edit else url_for('malfunctions.list_malfunctions') }}"
+               class="btn btn-outline-secondary">Annulla</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

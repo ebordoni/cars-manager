@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Carica documento – Cars Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+      <li class="breadcrumb-item"><a href="{{ url_for('documents.list_documents') }}">Documenti</a></li>
+      <li class="breadcrumb-item active">Carica</li>
+    </ol>
+  </nav>
+  <h1><i class="bi bi-upload text-success me-2"></i>Carica documento</h1>
+</div>
+
+<div class="row">
+  <div class="col-lg-7 col-xl-5">
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Auto <span class="text-danger">*</span></label>
+            <select name="car_id" class="form-select" required>
+              <option value="">— Seleziona —</option>
+              {% for car in cars %}
+              <option value="{{ car.id }}"
+                {{ 'selected' if form.get('car_id')|string == car.id|string }}>
+                {{ car.make }} {{ car.model }}
+                {% if car.license_plate %}({{ car.license_plate }}){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Tipo documento</label>
+            <select name="type" class="form-select">
+              {% for val, label in doc_types %}
+              <option value="{{ val }}" {{ 'selected' if form.get('type') == val }}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Titolo <span class="text-danger">*</span></label>
+            <input type="text" name="title" class="form-control" required
+                   value="{{ form.get('title', '') }}"
+                   placeholder="Es. Libretto auto, Polizza Generali 2024, Fattura Autofficina...">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">File <span class="text-danger">*</span></label>
+            <input type="file" name="file" class="form-control" required
+                   accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
+            <div class="form-text">Formati: PDF, JPG, PNG, DOCX, XLSX. Max 20 MB.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Note</label>
+            <textarea name="notes" class="form-control" rows="2"
+                      placeholder="Annotazioni sul documento...">{{ form.get('notes', '') }}</textarea>
+          </div>
+
+          <!-- Upload area feedback -->
+          <div id="filePreview" class="alert alert-info d-none mb-3 py-2">
+            <i class="bi bi-file-earmark me-2"></i>
+            <span id="filePreviewName"></span>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-success px-4">
+              <i class="bi bi-upload me-1"></i>Carica
+            </button>
+            <a href="{{ url_for('documents.list_documents') }}" class="btn btn-outline-secondary">Annulla</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+  document.querySelector('input[type="file"]').addEventListener('change', function() {
+    const preview = document.getElementById('filePreview');
+    const name = document.getElementById('filePreviewName');
+    if (this.files.length > 0) {
+      name.textContent = this.files[0].name + ' (' + (this.files[0].size / 1024).toFixed(0) + ' KB)';
+      preview.classList.remove('d-none');
+    } else {
+      preview.classList.add('d-none');
+    }
+  });
+</script>
+{% endblock %}
+{% endblock %}

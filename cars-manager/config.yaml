@@ -1,0 +1,39 @@
+name: "Cars Manager"
+description: >-
+  Gestione del garage di famiglia: manutenzioni, scadenze, documenti,
+  segnalazione guasti, reportistica e invio preventivi via email.
+version: "1.0.0"
+slug: "cars_manager"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+startup: application
+boot: auto
+ports:
+  5000/tcp: 5000
+options:
+  smtp_server: ""
+  smtp_port: 587
+  smtp_username: ""
+  smtp_password: ""
+  smtp_from: ""
+  smtp_use_tls: true
+schema:
+  smtp_server: "str?"
+  smtp_port: "int?"
+  smtp_username: "str?"
+  smtp_password: "str?"
+  smtp_from: "str?"
+  smtp_use_tls: "bool?"
+map:
+  - data:rw
+ingress: true
+ingress_port: 5000
+panel_icon: mdi:car-multiple
+panel_title: "Cars Manager"
+homeassistant_api: false
+hassio_api: false

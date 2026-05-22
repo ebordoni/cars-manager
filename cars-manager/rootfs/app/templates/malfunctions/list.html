@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Guasti – Cars Manager{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-start">
+  <div>
+    <h1><i class="bi bi-exclamation-triangle text-danger me-2"></i>Guasti & Segnalazioni</h1>
+    <p>{{ items|length }} segnalazion{{ 'e' if items|length == 1 else 'i' }}</p>
+  </div>
+  <a href="{{ url_for('malfunctions.new_malfunction') }}" class="btn btn-danger">
+    <i class="bi bi-plus-lg me-1"></i> Segnala guasto
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body py-3">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-sm-5 col-lg-3">
+        <label class="form-label small fw-semibold mb-1">Auto</label>
+        <select name="car_id" class="form-select form-select-sm">
+          <option value="">Tutte le auto</option>
+          {% for car in cars %}
+          <option value="{{ car.id }}" {{ 'selected' if selected_car == car.id }}>
+            {{ car.make }} {{ car.model }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-sm-4 col-lg-2">
+        <label class="form-label small fw-semibold mb-1">Stato</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">Tutti</option>
+          <option value="open"     {{ 'selected' if selected_status == 'open' }}>Aperto</option>
+          <option value="resolved" {{ 'selected' if selected_status == 'resolved' }}>Risolto</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">Filtra</button>
+        <a href="{{ url_for('malfunctions.list_malfunctions') }}" class="btn btn-sm btn-outline-secondary ms-1">Reset</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if items %}
+<div class="row g-3">
+  {% for f in items %}
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body d-flex align-items-center gap-4 py-3">
+        <!-- Severity indicator -->
+        <div class="text-center" style="min-width:64px">
+          <div class="badge severity-{{ f.severity }} rounded-pill px-3 py-2">
+            {{ severity_labels.get(f.severity, f.severity) }}
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-grow-1">
+          <div class="fw-bold">{{ f.title }}</div>
+          <small class="text-muted">
+            {{ f.make }} {{ f.model }}
+            {% if f.license_plate %}· {{ f.license_plate }}{% endif %}
+            · segnalato {{ f.date_reported }}
+          </small>
+          {% if f.description %}
+          <p class="mb-0 mt-1 text-muted small text-truncate" style="max-width:500px">{{ f.description }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Status + actions -->
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+          <span class="badge badge-{{ f.status }} rounded-pill">
+            {{ 'Aperto' if f.status == 'open' else 'Risolto' }}
+          </span>
+          <a href="{{ url_for('malfunctions.malfunction_detail', malfunction_id=f.id) }}"
+             class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-eye"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="card-body text-center py-5">
+    <i class="bi bi-check-circle fs-1 text-success"></i>
+    <h5 class="mt-3">Nessun guasto segnalato</h5>
+    <p class="text-muted">Segnala un problema riscontrato su una delle tue auto.</p>
+    <a href="{{ url_for('malfunctions.new_malfunction') }}" class="btn btn-danger">
+      <i class="bi bi-plus-lg me-1"></i> Segnala guasto
+    </a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

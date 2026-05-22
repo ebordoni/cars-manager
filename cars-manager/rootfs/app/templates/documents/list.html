@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Documenti – Cars Manager{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-start">
+  <div>
+    <h1><i class="bi bi-folder2-open text-primary me-2"></i>Documenti</h1>
+    <p>{{ docs|length }} document{{ 'o' if docs|length == 1 else 'i' }} archiviati</p>
+  </div>
+  <a href="{{ url_for('documents.upload_document') }}" class="btn btn-success">
+    <i class="bi bi-upload me-1"></i> Carica documento
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body py-3">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-sm-5 col-lg-3">
+        <label class="form-label small fw-semibold mb-1">Auto</label>
+        <select name="car_id" class="form-select form-select-sm">
+          <option value="">Tutte le auto</option>
+          {% for car in cars %}
+          <option value="{{ car.id }}" {{ 'selected' if selected_car == car.id }}>
+            {{ car.make }} {{ car.model }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-sm-5 col-lg-2">
+        <label class="form-label small fw-semibold mb-1">Tipo</label>
+        <select name="type" class="form-select form-select-sm">
+          <option value="">Tutti i tipi</option>
+          {% for val, label in doc_types %}
+          <option value="{{ val }}" {{ 'selected' if selected_type == val }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">Filtra</button>
+        <a href="{{ url_for('documents.list_documents') }}" class="btn btn-sm btn-outline-secondary ms-1">Reset</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if docs %}
+<div class="row g-3">
+  {% for doc in docs %}
+  <div class="col-sm-6 col-lg-4 col-xl-3">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column">
+        <div class="d-flex align-items-start gap-3 mb-2">
+          {% set ext = doc.original_name.rsplit('.',1)[-1].lower() %}
+          {% if ext == 'pdf' %}
+          <i class="bi bi-file-earmark-pdf fs-2 doc-icon-pdf mt-1"></i>
+          {% elif ext in ('jpg','jpeg','png') %}
+          <i class="bi bi-file-earmark-image fs-2 doc-icon-image mt-1"></i>
+          {% elif ext in ('docx','doc') %}
+          <i class="bi bi-file-earmark-word fs-2 text-primary mt-1"></i>
+          {% elif ext in ('xlsx','xls') %}
+          <i class="bi bi-file-earmark-excel fs-2 text-success mt-1"></i>
+          {% else %}
+          <i class="bi bi-file-earmark fs-2 doc-icon-other mt-1"></i>
+          {% endif %}
+          <div class="flex-grow-1 min-w-0">
+            <div class="fw-semibold text-truncate" title="{{ doc.title }}">{{ doc.title }}</div>
+            <small class="text-muted">{{ doc.make }} {{ doc.model }}</small>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap gap-1 mb-3">
+          <span class="badge bg-light text-dark border">{{ doc.type }}</span>
+          {% if doc.file_size %}
+          <span class="badge bg-light text-dark border">
+            {% if doc.file_size > 1048576 %}{{ '%.1f'|format(doc.file_size/1048576) }} MB
+            {% else %}{{ (doc.file_size/1024)|int }} KB{% endif %}
+          </span>
+          {% endif %}
+        </div>
+        <small class="text-muted mb-3">{{ doc.original_name }}</small>
+        {% if doc.notes %}
+        <small class="text-muted fst-italic mb-3">{{ doc.notes }}</small>
+        {% endif %}
+        <div class="mt-auto d-flex gap-2">
+          <a href="{{ url_for('documents.download_document', doc_id=doc.id) }}"
+             class="btn btn-sm btn-primary flex-grow-1">
+            <i class="bi bi-download me-1"></i>Download
+          </a>
+          <form method="POST" action="{{ url_for('documents.delete_document', doc_id=doc.id) }}"
+                onsubmit="return confirm('Eliminare il documento {{ doc.title }}?')">
+            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+      </div>
+      <div class="card-footer bg-white text-muted" style="font-size:.72rem">
+        Caricato il {{ doc.upload_date[:10] if doc.upload_date else '—' }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="card-body text-center py-5">
+    <i class="bi bi-folder2 fs-1 text-muted"></i>
+    <h5 class="mt-3">Nessun documento</h5>
+    <p class="text-muted">Carica libretti, polizze, fatture e altri documenti.</p>
+    <a href="{{ url_for('documents.upload_document') }}" class="btn btn-success">
+      <i class="bi bi-upload me-1"></i> Carica documento
+    </a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Reportistica – Cars Manager{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-start">
+  <div>
+    <h1><i class="bi bi-bar-chart-line text-primary me-2"></i>Reportistica</h1>
+    <p>Statistiche su costi, guasti e manutenzioni</p>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body py-3">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-sm-5 col-lg-3">
+        <label class="form-label small fw-semibold mb-1">Auto</label>
+        <select name="car_id" class="form-select form-select-sm">
+          <option value="">Tutte le auto</option>
+          {% for car in cars %}
+          <option value="{{ car.id }}" {{ 'selected' if selected_car == car.id }}>
+            {{ car.make }} {{ car.model }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-sm-3 col-lg-2">
+        <label class="form-label small fw-semibold mb-1">Anno</label>
+        <select name="year" class="form-select form-select-sm">
+          {% for y in years_range %}
+          <option value="{{ y }}" {{ 'selected' if selected_year == y }}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">Applica</button>
+        <a href="{{ url_for('reports.dashboard') }}" class="btn btn-sm btn-outline-secondary ms-1">Reset</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Summary stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card p-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-danger bg-opacity-10 text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+        <div>
+          <div class="stat-value text-danger">{{ malfunction_stats.total or 0 }}</div>
+          <div class="stat-label">Guasti totali</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card p-3" style="border-left-color:#0dcaf0">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-info bg-opacity-10 text-info"><i class="bi bi-exclamation-circle"></i></div>
+        <div>
+          <div class="stat-value text-info">{{ malfunction_stats.open or 0 }}</div>
+          <div class="stat-label">Guasti aperti</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card p-3" style="border-left-color:#198754">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-check-circle"></i></div>
+        <div>
+          <div class="stat-value text-success">{{ malfunction_stats.resolved or 0 }}</div>
+          <div class="stat-label">Guasti risolti</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card p-3" style="border-left-color:#f57c00">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon text-warning" style="background:rgba(245,124,0,.1)"><i class="bi bi-currency-euro"></i></div>
+        <div>
+          <div class="stat-value" style="color:#f57c00">
+            {{ '%.0f'|format(malfunction_stats.total_cost or 0) }}€
+          </div>
+          <div class="stat-label">Costi guasti</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Monthly costs chart -->
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header bg-white py-3">
+        <h6 class="mb-0 fw-semibold">
+          <i class="bi bi-bar-chart me-2 text-primary"></i>Costi manutenzioni mensili – {{ selected_year }}
+        </h6>
+      </div>
+      <div class="card-body">
+        <canvas id="monthlyChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Malfunction by severity -->
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header bg-white py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-pie-chart me-2 text-danger"></i>Guasti per gravità</h6>
+      </div>
+      <div class="card-body d-flex align-items-center justify-content-center">
+        <canvas id="severityChart" style="max-height:220px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Maintenance costs by type -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-white py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-pie-chart me-2 text-success"></i>Costi per tipo di manutenzione</h6>
+      </div>
+      <div class="card-body">
+        {% if maintenance_costs %}
+        <canvas id="maintTypeChart" height="160"></canvas>
+        <hr class="my-3">
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead class="table-light">
+              <tr><th>Tipo</th><th class="text-end">Interventi</th><th class="text-end">Costo totale</th></tr>
+            </thead>
+            <tbody>
+              {% for row in maintenance_costs %}
+              <tr>
+                <td>{{ row.type|capitalize }}</td>
+                <td class="text-end">{{ row.count }}</td>
+                <td class="text-end">{{ '%.2f'|format(row.total_cost) }} €</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-4">
+          <i class="bi bi-bar-chart fs-3"></i>
+          <p class="mt-2 mb-0">Nessun dato disponibile</p>
+          <small>Completa alcune scadenze con costo per visualizzare il grafico.</small>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Malfunction list -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-white py-3 d-flex justify-content-between">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-list-ul me-2"></i>Manutenzioni completate</h6>
+        <a href="{{ url_for('maintenance.list_maintenance', status='completed') }}" class="btn btn-sm btn-outline-secondary">Tutte</a>
+      </div>
+      <div class="card-body p-0">
+        {% if maintenance_costs %}
+        <div class="list-group list-group-flush">
+          {% for row in maintenance_costs %}
+          <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+            <div>
+              <div class="fw-semibold">{{ row.type|capitalize }}</div>
+              <small class="text-muted">{{ row.count }} intervento{{ 'i' if row.count != 1 }}</small>
+            </div>
+            <div class="fw-bold text-primary">{{ '%.2f'|format(row.total_cost) }} €</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-4">
+          <p class="mb-0">Nessun dato</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+  const months = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+  const monthlyData = {{ monthly_chart_data | tojson }};
+  const maintLabels = {{ maint_labels | tojson }};
+  const maintValues = {{ maint_values | tojson }};
+  const severityValues = {{ severity_values | tojson }};
+
+  // Monthly bar chart
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Costo (€)',
+        data: monthlyData,
+        backgroundColor: 'rgba(21,101,192,0.75)',
+        borderColor: '#1565c0',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: v => v + ' €' } }
+      }
+    }
+  });
+
+  // Severity doughnut
+  new Chart(document.getElementById('severityChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Bassa','Media','Alta','Critica'],
+      datasets: [{
+        data: severityValues,
+        backgroundColor: ['#d1e7dd','#fff3cd','#ffe5d0','#f8d7da'],
+        borderColor: ['#0f5132','#856404','#7c3d00','#842029'],
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // Maintenance by type bar
+  if (maintLabels.length > 0) {
+    new Chart(document.getElementById('maintTypeChart'), {
+      type: 'bar',
+      data: {
+        labels: maintLabels,
+        datasets: [{
+          label: 'Costo totale (€)',
+          data: maintValues,
+          backgroundColor: ['rgba(21,101,192,.7)','rgba(245,124,0,.7)','rgba(25,135,84,.7)','rgba(220,53,69,.7)','rgba(108,117,125,.7)'],
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { callback: v => v + ' €' } } }
+      }
+    });
+  }
+</script>
+{% endblock %}
+{% endblock %}

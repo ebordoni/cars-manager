@@ -1,0 +1,212 @@
+{% extends "base.html" %} {% block title %}{{ item.title }} – Cars Manager{%
+endblock %} {% block content %}
+<div class="page-header d-flex justify-content-between align-items-start">
+  <div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item">
+          <a href="{{ url_for('malfunctions.list_malfunctions') }}">Guasti</a>
+        </li>
+        <li class="breadcrumb-item active">{{ item.title }}</li>
+      </ol>
+    </nav>
+    <h1>{{ item.title }}</h1>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <span class="badge severity-{{ item.severity }} rounded-pill px-3 py-2">
+        {{ severity_labels.get(item.severity, item.severity) }}
+      </span>
+      <span class="badge badge-{{ item.status }} rounded-pill px-3 py-2">
+        {{ 'Aperto' if item.status == 'open' else 'Risolto' }}
+      </span>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a
+      href="{{ url_for('malfunctions.edit_malfunction', malfunction_id=item.id) }}"
+      class="btn btn-outline-primary"
+    >
+      <i class="bi bi-pencil me-1"></i>Modifica
+    </a>
+    <form
+      method="POST"
+      action="{{ url_for('malfunctions.delete_malfunction', malfunction_id=item.id) }}"
+      onsubmit="return confirm('Eliminare questa segnalazione?');"
+    >
+      <button class="btn btn-outline-danger">
+        <i class="bi bi-trash"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Details -->
+  <div class="col-lg-7">
+    <div class="card mb-4">
+      <div class="card-header bg-white py-3">
+        <h6 class="mb-0 fw-semibold">
+          <i class="bi bi-info-circle text-danger me-2"></i>Dettagli
+          segnalazione
+        </h6>
+      </div>
+      <div class="card-body">
+        <dl class="row small mb-0">
+          <dt class="col-4 text-muted">Auto</dt>
+          <dd class="col-8">
+            <a
+              href="{{ url_for('cars.car_detail', car_id=item.car_id) }}"
+              class="text-decoration-none"
+            >
+              {{ item.make }} {{ item.model }} {% if item.license_plate %}({{
+              item.license_plate }}){% endif %}
+            </a>
+          </dd>
+          <dt class="col-4 text-muted">Data segnalazione</dt>
+          <dd class="col-8">{{ item.date_reported }}</dd>
+          <dt class="col-4 text-muted">Gravità</dt>
+          <dd class="col-8">
+            <span class="badge severity-{{ item.severity }} rounded-pill">
+              {{ severity_labels.get(item.severity, item.severity) }}
+            </span>
+          </dd>
+          {% if item.resolved_date %}
+          <dt class="col-4 text-muted">Data risoluzione</dt>
+          <dd class="col-8">{{ item.resolved_date }}</dd>
+          {% endif %} {% if item.cost %}
+          <dt class="col-4 text-muted">Costo</dt>
+          <dd class="col-8">{{ '%.2f'|format(item.cost) }} €</dd>
+          {% endif %}
+        </dl>
+
+        {% if item.description %}
+        <hr class="my-3" />
+        <h6 class="small fw-semibold text-muted mb-2">Descrizione</h6>
+        <p class="mb-0">{{ item.description }}</p>
+        {% endif %} {% if item.resolution_notes %}
+        <hr class="my-3" />
+        <h6 class="small fw-semibold text-muted mb-2">Note di risoluzione</h6>
+        <p class="mb-0">{{ item.resolution_notes }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Resolve form (if open) -->
+    {% if item.status == 'open' %}
+    <div class="card border-success">
+      <div class="card-header bg-success bg-opacity-10 py-3">
+        <h6 class="mb-0 fw-semibold text-success">
+          <i class="bi bi-check-circle me-2"></i>Contrassegna come risolto
+        </h6>
+      </div>
+      <div class="card-body">
+        <form
+          method="POST"
+          action="{{ url_for('malfunctions.resolve_malfunction', malfunction_id=item.id) }}"
+        >
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold">Data risoluzione</label>
+              <input
+                type="date"
+                name="resolved_date"
+                class="form-control"
+                id="resolvedDate"
+              />
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold">Costo intervento (€)</label>
+              <input
+                type="number"
+                name="cost"
+                class="form-control"
+                step="0.01"
+                min="0"
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Note di risoluzione</label>
+              <textarea
+                name="resolution_notes"
+                class="form-control"
+                rows="2"
+                placeholder="Come è stato risolto il problema?"
+              ></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success mt-3">
+            <i class="bi bi-check-lg me-1"></i>Segna come risolto
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Side: contacts + email -->
+  <div class="col-lg-5">
+    <div class="card">
+      <div
+        class="card-header bg-white py-3 d-flex justify-content-between align-items-center"
+      >
+        <h6 class="mb-0 fw-semibold">
+          <i class="bi bi-envelope text-primary me-2"></i>Richiedi preventivo
+        </h6>
+        {% if item.status == 'open' %}
+        <a
+          href="{{ url_for('malfunctions.send_email', malfunction_id=item.id) }}"
+          class="btn btn-sm btn-primary"
+        >
+          <i class="bi bi-envelope-fill me-1"></i>Invia email
+        </a>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% if contacts %}
+        <p class="text-muted small mb-3">Contatti con email disponibile:</p>
+        <ul class="list-group list-group-flush">
+          {% for c in contacts %} {% if c.email %}
+          <li class="list-group-item px-0 py-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold small">{{ c.name }}</div>
+                <small class="text-muted">{{ c.email }}</small>
+                {% if c.phone %}<br /><small class="text-muted"
+                  ><i class="bi bi-telephone me-1"></i>{{ c.phone }}</small
+                >{% endif %}
+              </div>
+              {% if item.status == 'open' %}
+              <a
+                href="{{ url_for('malfunctions.send_email', malfunction_id=item.id) }}?contact={{ c.id }}"
+                class="btn btn-sm btn-outline-primary"
+              >
+                <i class="bi bi-send"></i>
+              </a>
+              {% endif %}
+            </div>
+          </li>
+          {% endif %} {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-center text-muted py-3">
+          <i class="bi bi-person-plus fs-3"></i>
+          <p class="small mt-2 mb-2">Nessun contatto con email</p>
+          <a
+            href="{{ url_for('contacts.new_contact') }}"
+            class="btn btn-sm btn-outline-primary"
+          >
+            Aggiungi contatto
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+  document.getElementById("resolvedDate").value = new Date()
+    .toISOString()
+    .split("T")[0];
+</script>
+{% endblock %} {% endblock %}

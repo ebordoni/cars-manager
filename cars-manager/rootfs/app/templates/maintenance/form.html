@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% set is_edit = event.get('id') %}
+{% block title %}{{ 'Modifica scadenza' if is_edit else 'Nuova scadenza' }} – Cars Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+      <li class="breadcrumb-item"><a href="{{ url_for('maintenance.list_maintenance') }}">Scadenze</a></li>
+      <li class="breadcrumb-item active">{{ 'Modifica' if is_edit else 'Nuova' }}</li>
+    </ol>
+  </nav>
+  <h1>{{ 'Modifica scadenza' if is_edit else 'Nuova scadenza' }}</h1>
+</div>
+
+<div class="row">
+  <div class="col-lg-7 col-xl-5">
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Auto <span class="text-danger">*</span></label>
+            <select name="car_id" class="form-select" required {{ 'disabled' if is_edit }}>
+              <option value="">— Seleziona —</option>
+              {% for car in cars %}
+              <option value="{{ car.id }}"
+                {{ 'selected' if event.get('car_id')|string == car.id|string }}>
+                {{ car.make }} {{ car.model }}
+                {% if car.license_plate %}({{ car.license_plate }}){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+            {% if is_edit %}
+            <input type="hidden" name="car_id" value="{{ event.car_id }}">
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Tipo</label>
+            <select name="type" class="form-select">
+              {% for val, label in event_types %}
+              <option value="{{ val }}" {{ 'selected' if event.get('type') == val }}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Titolo <span class="text-danger">*</span></label>
+            <input type="text" name="title" class="form-control" required
+                   value="{{ event.get('title', '') }}"
+                   placeholder="Es. Tagliando olio, Revisione biennale, Rinnovo assicurazione...">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Data scadenza</label>
+            <input type="date" name="due_date" class="form-control"
+                   value="{{ event.get('due_date', '') }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Preavviso (giorni)</label>
+            <input type="number" name="reminder_days" class="form-control"
+                   value="{{ event.get('reminder_days', 30) }}" min="0" max="365">
+            <div class="form-text">Quanti giorni prima della scadenza vuoi essere avvisato.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Note</label>
+            <textarea name="notes" class="form-control" rows="3"
+                      placeholder="Dettagli aggiuntivi...">{{ event.get('notes', '') }}</textarea>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="bi bi-check-lg me-1"></i>{{ 'Salva' if is_edit else 'Aggiungi scadenza' }}
+            </button>
+            <a href="{{ url_for('maintenance.list_maintenance') }}" class="btn btn-outline-secondary">Annulla</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
