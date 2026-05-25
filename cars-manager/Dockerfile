@@ -17,5 +17,3 @@ RUN pip3 install --no-cache-dir --break-system-packages \
 
 # Ensure run script is executable
 RUN chmod a+x /etc/s6-overlay/s6-rc.d/cars-manager/run
-
-CMD ["/init"]
