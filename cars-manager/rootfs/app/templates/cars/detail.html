@@ -130,25 +130,19 @@ Manager{% endblock %} {% block content %}
     <ul class="nav nav-tabs mb-3" id="carTabs">
       <li class="nav-item">
         <a class="nav-link active" data-bs-toggle="tab" href="#tab-maintenance">
-          <i class="bi bi-calendar-check me-1"></i>Scadenze {% if
-          maintenance|selectattr('status','in',['pending','overdue'])|list|length
-          > 0 %}
-          <span class="badge bg-warning text-dark ms-1"
-            >{{
-            maintenance|selectattr('status','in',['pending','overdue'])|list|length
-            }}</span
-          >
+          <i class="bi bi-calendar-check me-1"></i>Scadenze {% set _pm =
+          maintenance|rejectattr('status','equalto','completed')|list %} {% if
+          _pm|length > 0 %}
+          <span class="badge bg-warning text-dark ms-1">{{ _pm|length }}</span>
           {% endif %}
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" data-bs-toggle="tab" href="#tab-malfunctions">
-          <i class="bi bi-exclamation-triangle me-1"></i>Guasti {% if
-          malfunctions|selectattr('status','eq','open')|list|length > 0 %}
-          <span class="badge bg-danger ms-1"
-            >{{ malfunctions|selectattr('status','eq','open')|list|length
-            }}</span
-          >
+          <i class="bi bi-exclamation-triangle me-1"></i>Guasti {% set _of =
+          malfunctions|selectattr('status','equalto','open')|list %} {% if
+          _of|length > 0 %}
+          <span class="badge bg-danger ms-1">{{ _of|length }}</span>
           {% endif %}
         </a>
       </li>
