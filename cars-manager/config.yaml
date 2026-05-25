@@ -14,7 +14,7 @@ arch:
 startup: application
 boot: auto
 ports:
-  5000/tcp: 5000
+  8000/tcp: 8000
 options:
   smtp_port: 587
   smtp_use_tls: true
@@ -28,7 +28,7 @@ schema:
 map:
   - data:rw
 ingress: true
-ingress_port: 5000
+ingress_port: 8000
 panel_icon: mdi:car-multiple
 panel_title: "Cars Manager"
 homeassistant_api: false

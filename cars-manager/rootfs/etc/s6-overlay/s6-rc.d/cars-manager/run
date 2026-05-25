@@ -34,7 +34,7 @@ if bashio::config.has_value "smtp_use_tls"; then
     export SMTP_USE_TLS="$(bashio::config 'smtp_use_tls')"
 fi
 
-bashio::log.info "Cars Manager is ready on port 5000"
+bashio::log.info "Cars Manager is ready on port 8000"
 
 # Start the Flask application
 cd /app
