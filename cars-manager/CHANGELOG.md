@@ -7,6 +7,15 @@ e questo progetto segue il [Versionamento Semantico](https://semver.org/lang/it/
 
 ---
 
+## [1.0.5] - 2026-05-25
+
+### Aggiunto
+
+- Campo Costo (€) nel form di creazione/modifica scadenza
+- Ricorrenza quadriennale (ogni 48 mesi) tra le opzioni di periodicità
+
+---
+
 ## [1.0.4] - 2026-05-25
 
 ### Aggiunto

@@ -299,17 +299,17 @@ def get_maintenance_event(event_id):
 
 
 def create_maintenance_event(car_id, event_type, title, due_date=None,
-                              notes=None, reminder_days=30, recurrence_months=0):
+                              notes=None, reminder_days=30, recurrence_months=0, cost=None):
     conn = get_db()
     try:
         cur = conn.execute(
             """
             INSERT INTO maintenance_events
-                (car_id, type, title, due_date, notes, status, reminder_days, recurrence_months)
-            VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)
+                (car_id, type, title, due_date, notes, status, reminder_days, recurrence_months, cost)
+            VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)
             """,
             (car_id, event_type, title, due_date or None, notes or None,
-             reminder_days, recurrence_months or 0),
+             reminder_days, recurrence_months or 0, cost),
         )
         conn.commit()
         return cur.lastrowid
@@ -318,17 +318,17 @@ def create_maintenance_event(car_id, event_type, title, due_date=None,
 
 
 def update_maintenance_event(event_id, event_type, title, due_date=None,
-                              notes=None, reminder_days=30, recurrence_months=0):
+                              notes=None, reminder_days=30, recurrence_months=0, cost=None):
     conn = get_db()
     try:
         conn.execute(
             """
             UPDATE maintenance_events
-            SET type=?, title=?, due_date=?, notes=?, reminder_days=?, recurrence_months=?
+            SET type=?, title=?, due_date=?, notes=?, reminder_days=?, recurrence_months=?, cost=?
             WHERE id=?
             """,
             (event_type, title, due_date or None, notes or None,
-             reminder_days, recurrence_months or 0, event_id),
+             reminder_days, recurrence_months or 0, cost, event_id),
         )
         conn.commit()
     finally:

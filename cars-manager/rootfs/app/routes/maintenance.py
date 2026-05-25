@@ -48,6 +48,7 @@ def new_event():
                 event_types=EVENT_TYPES,
             )
 
+        cost_raw = request.form.get("cost", "").strip()
         db.create_maintenance_event(
             car_id=car_id,
             event_type=request.form.get("type", "maintenance"),
@@ -56,6 +57,7 @@ def new_event():
             notes=request.form.get("notes", "").strip() or None,
             reminder_days=int(request.form.get("reminder_days", 30)),
             recurrence_months=int(request.form.get("recurrence_months", 0)),
+            cost=float(cost_raw) if cost_raw else None,
         )
         flash("Scadenza aggiunta con successo!", "success")
         return redirect(url_for("maintenance.list_maintenance"))
@@ -85,6 +87,7 @@ def edit_event(event_id):
                 cars=cars,
                 event_types=EVENT_TYPES,
             )
+        cost_raw = request.form.get("cost", "").strip()
         db.update_maintenance_event(
             event_id=event_id,
             event_type=request.form.get("type", "maintenance"),
@@ -93,6 +96,7 @@ def edit_event(event_id):
             notes=request.form.get("notes", "").strip() or None,
             reminder_days=int(request.form.get("reminder_days", 30)),
             recurrence_months=int(request.form.get("recurrence_months", 0)),
+            cost=float(cost_raw) if cost_raw else None,
         )
         flash("Scadenza aggiornata!", "success")
         return redirect(url_for("maintenance.list_maintenance"))

@@ -65,6 +65,7 @@
               <option value="12" {{ 'selected' if event.get('recurrence_months', 0)|int == 12 }}>Annuale (ogni 12 mesi)</option>
               <option value="24" {{ 'selected' if event.get('recurrence_months', 0)|int == 24 }}>Biennale (ogni 24 mesi)</option>
               <option value="36" {{ 'selected' if event.get('recurrence_months', 0)|int == 36 }}>Triennale (ogni 36 mesi)</option>
+              <option value="48" {{ 'selected' if event.get('recurrence_months', 0)|int == 48 }}>Quadriennale (ogni 48 mesi)</option>
             </select>
             <div class="form-text">Al completamento verrà creata automaticamente la scadenza successiva.</div>
           </div>
@@ -74,6 +75,12 @@
             <input type="number" name="reminder_days" class="form-control"
                    value="{{ event.get('reminder_days', 30) }}" min="0" max="365">
             <div class="form-text">Quanti giorni prima della scadenza vuoi essere avvisato.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Costo (€)</label>
+            <input type="number" name="cost" class="form-control" step="0.01" min="0"
+                   value="{{ event.get('cost', '') }}" placeholder="Es. 120.00">
           </div>
 
           <div class="mb-3">
