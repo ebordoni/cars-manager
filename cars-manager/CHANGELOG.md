@@ -7,6 +7,29 @@ e questo progetto segue il [Versionamento Semantico](https://semver.org/lang/it/
 
 ---
 
+## [1.0.4] - 2026-05-25
+
+### Aggiunto
+
+- Scadenze periodiche: possibilità di impostare una ricorrenza (6 mesi, annuale,
+  biennale, triennale) su ogni scadenza
+- Al completamento di una scadenza ricorrente viene creata automaticamente
+  la scadenza successiva con la data calcolata in base all'intervallo
+- Migrazione automatica del database per i record esistenti
+
+---
+
+## [1.0.3] - 2026-05-25
+
+### Corretto
+
+- Fix avvio addon: rimosso `CMD ["/init"]` dal Dockerfile — l'immagine base HA
+  usa già `ENTRYPOINT ["/init"]`, la duplicazione causava `s6-overlay-suexec:
+fatal: can only run as pid 1`
+- Porta cambiata da 5000 a 8000 per evitare conflitti
+
+---
+
 ## [1.0.2] - 2026-05-25
 
 ### Corretto

@@ -58,6 +58,18 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label fw-semibold">Ricorrenza</label>
+            <select name="recurrence_months" class="form-select">
+              <option value="0"  {{ 'selected' if event.get('recurrence_months', 0)|int == 0  }}>Nessuna</option>
+              <option value="6"  {{ 'selected' if event.get('recurrence_months', 0)|int == 6  }}>Ogni 6 mesi</option>
+              <option value="12" {{ 'selected' if event.get('recurrence_months', 0)|int == 12 }}>Annuale (ogni 12 mesi)</option>
+              <option value="24" {{ 'selected' if event.get('recurrence_months', 0)|int == 24 }}>Biennale (ogni 24 mesi)</option>
+              <option value="36" {{ 'selected' if event.get('recurrence_months', 0)|int == 36 }}>Triennale (ogni 36 mesi)</option>
+            </select>
+            <div class="form-text">Al completamento verrà creata automaticamente la scadenza successiva.</div>
+          </div>
+
+          <div class="mb-3">
             <label class="form-label fw-semibold">Preavviso (giorni)</label>
             <input type="number" name="reminder_days" class="form-control"
                    value="{{ event.get('reminder_days', 30) }}" min="0" max="365">

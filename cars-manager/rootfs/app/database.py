@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import calendar
 from datetime import datetime, date
 
 DB_PATH = "/data/cars_manager.db"
@@ -46,17 +47,18 @@ def init_db():
             );
 
             CREATE TABLE IF NOT EXISTS maintenance_events (
-                id             INTEGER PRIMARY KEY AUTOINCREMENT,
-                car_id         INTEGER NOT NULL,
-                type           TEXT    NOT NULL,
-                title          TEXT    NOT NULL,
-                due_date       TEXT,
-                completed_date TEXT,
-                cost           REAL,
-                notes          TEXT,
-                status         TEXT DEFAULT 'pending',
-                reminder_days  INTEGER DEFAULT 30,
-                created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                car_id             INTEGER NOT NULL,
+                type               TEXT    NOT NULL,
+                title              TEXT    NOT NULL,
+                due_date           TEXT,
+                completed_date     TEXT,
+                cost               REAL,
+                notes              TEXT,
+                status             TEXT DEFAULT 'pending',
+                reminder_days      INTEGER DEFAULT 30,
+                recurrence_months  INTEGER DEFAULT 0,
+                created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
             );
 
@@ -102,6 +104,14 @@ def init_db():
             """
         )
         conn.commit()
+        # Migrate existing databases
+        try:
+            conn.execute(
+                "ALTER TABLE maintenance_events ADD COLUMN recurrence_months INTEGER DEFAULT 0"
+            )
+            conn.commit()
+        except Exception:
+            pass  # column already exists
     finally:
         conn.close()
 
@@ -289,16 +299,17 @@ def get_maintenance_event(event_id):
 
 
 def create_maintenance_event(car_id, event_type, title, due_date=None,
-                              notes=None, reminder_days=30):
+                              notes=None, reminder_days=30, recurrence_months=0):
     conn = get_db()
     try:
         cur = conn.execute(
             """
             INSERT INTO maintenance_events
-                (car_id, type, title, due_date, notes, status, reminder_days)
-            VALUES (?, ?, ?, ?, ?, 'pending', ?)
+                (car_id, type, title, due_date, notes, status, reminder_days, recurrence_months)
+            VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)
             """,
-            (car_id, event_type, title, due_date or None, notes or None, reminder_days),
+            (car_id, event_type, title, due_date or None, notes or None,
+             reminder_days, recurrence_months or 0),
         )
         conn.commit()
         return cur.lastrowid
@@ -307,16 +318,17 @@ def create_maintenance_event(car_id, event_type, title, due_date=None,
 
 
 def update_maintenance_event(event_id, event_type, title, due_date=None,
-                              notes=None, reminder_days=30):
+                              notes=None, reminder_days=30, recurrence_months=0):
     conn = get_db()
     try:
         conn.execute(
             """
             UPDATE maintenance_events
-            SET type=?, title=?, due_date=?, notes=?, reminder_days=?
+            SET type=?, title=?, due_date=?, notes=?, reminder_days=?, recurrence_months=?
             WHERE id=?
             """,
-            (event_type, title, due_date or None, notes or None, reminder_days, event_id),
+            (event_type, title, due_date or None, notes or None,
+             reminder_days, recurrence_months or 0, event_id),
         )
         conn.commit()
     finally:
@@ -326,6 +338,10 @@ def update_maintenance_event(event_id, event_type, title, due_date=None,
 def complete_maintenance_event(event_id, completed_date, cost=None, completion_notes=None):
     conn = get_db()
     try:
+        event = conn.execute(
+            "SELECT * FROM maintenance_events WHERE id = ?", (event_id,)
+        ).fetchone()
+
         conn.execute(
             """
             UPDATE maintenance_events
@@ -335,6 +351,30 @@ def complete_maintenance_event(event_id, completed_date, cost=None, completion_n
             """,
             (completed_date, cost, completion_notes, completion_notes, event_id),
         )
+
+        # Auto-create next occurrence for recurring events
+        if event and event['recurrence_months'] and event['due_date']:
+            try:
+                base = date.fromisoformat(event['due_date'])
+                m = event['recurrence_months']
+                total_months = base.month - 1 + m
+                next_year = base.year + total_months // 12
+                next_month = total_months % 12 + 1
+                next_day = min(base.day, calendar.monthrange(next_year, next_month)[1])
+                next_due = date(next_year, next_month, next_day).isoformat()
+                conn.execute(
+                    """
+                    INSERT INTO maintenance_events
+                        (car_id, type, title, due_date, notes, status,
+                         reminder_days, recurrence_months)
+                    VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)
+                    """,
+                    (event['car_id'], event['type'], event['title'], next_due,
+                     event['notes'], event['reminder_days'], event['recurrence_months']),
+                )
+            except Exception:
+                pass  # Non bloccare il completamento se la creazione fallisce
+
         conn.commit()
     finally:
         conn.close()

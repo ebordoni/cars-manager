@@ -55,6 +55,7 @@ def new_event():
             due_date=request.form.get("due_date") or None,
             notes=request.form.get("notes", "").strip() or None,
             reminder_days=int(request.form.get("reminder_days", 30)),
+            recurrence_months=int(request.form.get("recurrence_months", 0)),
         )
         flash("Scadenza aggiunta con successo!", "success")
         return redirect(url_for("maintenance.list_maintenance"))
@@ -91,6 +92,7 @@ def edit_event(event_id):
             due_date=request.form.get("due_date") or None,
             notes=request.form.get("notes", "").strip() or None,
             reminder_days=int(request.form.get("reminder_days", 30)),
+            recurrence_months=int(request.form.get("recurrence_months", 0)),
         )
         flash("Scadenza aggiornata!", "success")
         return redirect(url_for("maintenance.list_maintenance"))
