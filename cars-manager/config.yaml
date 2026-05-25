@@ -2,7 +2,7 @@ name: "Cars Manager"
 description: >-
   Gestione del garage di famiglia: manutenzioni, scadenze, documenti,
   segnalazione guasti, reportistica e invio preventivi via email.
-version: "1.0.1"
+version: "1.0.2"
 slug: "cars_manager"
 init: false
 arch:
@@ -16,17 +16,13 @@ boot: auto
 ports:
   5000/tcp: 5000
 options:
-  smtp_server: ""
   smtp_port: 587
-  smtp_username: ""
-  smtp_password: ""
-  smtp_from: ""
   smtp_use_tls: true
 schema:
   smtp_server: "str?"
   smtp_port: "int?"
   smtp_username: "str?"
-  smtp_password: "str?"
+  smtp_password: "password?"
   smtp_from: "str?"
   smtp_use_tls: "bool?"
 map:

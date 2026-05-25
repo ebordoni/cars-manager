@@ -7,6 +7,16 @@ e questo progetto segue il [Versionamento Semantico](https://semver.org/lang/it/
 
 ---
 
+## [1.0.2] - 2026-05-25
+
+### Corretto
+
+- Fix critico: opzioni SMTP con stringa vuota `""` causavano fallimento della validazione
+  dello schema HA (`str?` non ammette stringa vuota, solo assente/null)
+- Cambio tipo schema `smtp_password` da `str?` a `password?` (campo mascherato in UI)
+
+---
+
 ## [1.0.1] - 2026-05-25
 
 ### Corretto
