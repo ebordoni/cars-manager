@@ -7,6 +7,17 @@ e questo progetto segue il [Versionamento Semantico](https://semver.org/lang/it/
 
 ---
 
+## [1.0.1] - 2026-05-25
+
+### Corretto
+
+- Fix errore Jinja2: filtro `enumerate` non disponibile nella pagina storico chilometraggio
+- Fix errore Jinja2: test `in` e `eq` non validi in `selectattr` nella pagina dettaglio auto
+- Risolto problema installazione pip su Alpine con PEP 668 (`--break-system-packages`)
+- Rimossa dipendenza non necessaria `python-magic`
+
+---
+
 ## [1.0.0] - 2026-05-22
 
 ### Aggiunto
