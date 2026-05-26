@@ -112,6 +112,11 @@ def init_db():
             conn.commit()
         except Exception:
             pass  # column already exists
+        try:
+            conn.execute("ALTER TABLE documents ADD COLUMN cost REAL")
+            conn.commit()
+        except Exception:
+            pass  # column already exists
     finally:
         conn.close()
 
@@ -472,19 +477,48 @@ def get_document(doc_id):
 
 
 def create_document(car_id, doc_type, title, filename, original_name,
-                    file_size=None, notes=None):
+                    file_size=None, notes=None, cost=None):
     conn = get_db()
     try:
         cur = conn.execute(
             """
             INSERT INTO documents
-                (car_id, type, title, filename, original_name, file_size, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+                (car_id, type, title, filename, original_name, file_size, notes, cost)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (car_id, doc_type, title, filename, original_name, file_size, notes or None),
+            (car_id, doc_type, title, filename, original_name, file_size, notes or None, cost),
         )
         conn.commit()
         return cur.lastrowid
+    finally:
+        conn.close()
+
+
+def update_document(doc_id, doc_type, title, notes=None, cost=None,
+                    filename=None, original_name=None, file_size=None):
+    conn = get_db()
+    try:
+        if filename:
+            conn.execute(
+                """
+                UPDATE documents
+                SET type=?, title=?, notes=?, cost=?,
+                    filename=?, original_name=?, file_size=?
+                WHERE id=?
+                """,
+                (doc_type, title, notes or None, cost,
+                 filename, original_name, file_size, doc_id),
+            )
+        else:
+            conn.execute(
+                """
+                UPDATE documents
+                SET type=?, title=?, notes=?, cost=?
+                WHERE id=?
+                """,
+                (doc_type, title, notes or None, cost, doc_id),
+            )
+        conn.commit()
     finally:
         conn.close()
 

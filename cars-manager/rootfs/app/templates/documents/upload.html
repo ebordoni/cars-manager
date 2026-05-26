@@ -60,6 +60,17 @@
                       placeholder="Annotazioni sul documento...">{{ form.get('notes', '') }}</textarea>
           </div>
 
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Costo (€)</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+              <input type="number" name="cost" class="form-control" min="0" step="0.01"
+                     value="{{ form.get('cost', '') }}"
+                     placeholder="0.00">
+            </div>
+            <div class="form-text">Opzionale. Costo associato al documento (es. intervento di manutenzione).</div>
+          </div>
+
           <!-- Upload area feedback -->
           <div id="filePreview" class="alert alert-info d-none mb-3 py-2">
             <i class="bi bi-file-earmark me-2"></i>

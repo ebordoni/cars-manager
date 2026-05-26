@@ -76,6 +76,11 @@
             {% else %}{{ (doc.file_size/1024)|int }} KB{% endif %}
           </span>
           {% endif %}
+          {% if doc.cost %}
+          <span class="badge bg-success-subtle text-success border border-success-subtle">
+            <i class="bi bi-currency-euro"></i>{{ '%.2f'|format(doc.cost) }}
+          </span>
+          {% endif %}
         </div>
         <small class="text-muted mb-3">{{ doc.original_name }}</small>
         {% if doc.notes %}
@@ -85,6 +90,10 @@
           <a href="{{ url_for('documents.download_document', doc_id=doc.id) }}"
              class="btn btn-sm btn-primary flex-grow-1">
             <i class="bi bi-download me-1"></i>Download
+          </a>
+          <a href="{{ url_for('documents.edit_document', doc_id=doc.id) }}"
+             class="btn btn-sm btn-outline-warning">
+            <i class="bi bi-pencil"></i>
           </a>
           <form method="POST" action="{{ url_for('documents.delete_document', doc_id=doc.id) }}"
                 onsubmit="return confirm('Eliminare il documento {{ doc.title }}?')">

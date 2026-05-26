@@ -7,6 +7,17 @@ e questo progetto segue il [Versionamento Semantico](https://semver.org/lang/it/
 
 ---
 
+## [1.0.6] - 2026-05-26
+
+### Aggiunto
+
+- Modifica documenti: possibilità di aggiornare tipo, titolo, note e costo di un documento già caricato
+- Sostituzione file: nel form di modifica è possibile caricare un nuovo file che sostituisce il precedente (il vecchio viene rimosso dal disco)
+- Campo **Costo (€)** nella gestione documentale per associare una spesa al documento (es. fattura officina)
+- Badge costo visibile nella lista documenti
+
+---
+
 ## [1.0.5] - 2026-05-25
 
 ### Aggiunto

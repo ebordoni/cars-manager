@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Modifica documento – Cars Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+      <li class="breadcrumb-item"><a href="{{ url_for('documents.list_documents') }}">Documenti</a></li>
+      <li class="breadcrumb-item active">Modifica</li>
+    </ol>
+  </nav>
+  <h1><i class="bi bi-pencil-square text-warning me-2"></i>Modifica documento</h1>
+</div>
+
+<div class="row">
+  <div class="col-lg-7 col-xl-5">
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST" enctype="multipart/form-data">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Auto</label>
+            <input type="text" class="form-control" disabled
+                   value="{{ doc.make }} {{ doc.model }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Tipo documento</label>
+            <select name="type" class="form-select">
+              {% for val, label in doc_types %}
+              <option value="{{ val }}" {{ 'selected' if doc.type == val }}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Titolo <span class="text-danger">*</span></label>
+            <input type="text" name="title" class="form-control" required
+                   value="{{ doc.title }}"
+                   placeholder="Es. Libretto auto, Polizza Generali 2024, Fattura Autofficina...">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Costo (€)</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+              <input type="number" name="cost" class="form-control" min="0" step="0.01"
+                     value="{{ '%.2f'|format(doc.cost) if doc.cost else '' }}"
+                     placeholder="0.00">
+            </div>
+            <div class="form-text">Opzionale. Costo associato al documento (es. intervento di manutenzione).</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Note</label>
+            <textarea name="notes" class="form-control" rows="2"
+                      placeholder="Annotazioni sul documento...">{{ doc.notes or '' }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Sostituisci file</label>
+            <div class="mb-2 p-2 bg-light rounded border d-flex align-items-center gap-2">
+              {% set ext = doc.original_name.rsplit('.',1)[-1].lower() %}
+              {% if ext == 'pdf' %}
+              <i class="bi bi-file-earmark-pdf text-danger"></i>
+              {% elif ext in ('jpg','jpeg','png') %}
+              <i class="bi bi-file-earmark-image text-warning"></i>
+              {% elif ext in ('docx','doc') %}
+              <i class="bi bi-file-earmark-word text-primary"></i>
+              {% elif ext in ('xlsx','xls') %}
+              <i class="bi bi-file-earmark-excel text-success"></i>
+              {% else %}
+              <i class="bi bi-file-earmark text-secondary"></i>
+              {% endif %}
+              <span class="small text-muted">{{ doc.original_name }}
+                {% if doc.file_size %}
+                  ({% if doc.file_size > 1048576 %}{{ '%.1f'|format(doc.file_size/1048576) }} MB
+                  {% else %}{{ (doc.file_size/1024)|int }} KB{% endif %})
+                {% endif %}
+              </span>
+            </div>
+            <input type="file" name="file" class="form-control"
+                   accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
+            <div class="form-text">Lascia vuoto per mantenere il file attuale. Formati: PDF, JPG, PNG, DOCX, XLSX.</div>
+          </div>
+
+          <div id="filePreview" class="alert alert-info d-none mb-3 py-2">
+            <i class="bi bi-file-earmark me-2"></i>
+            <span id="filePreviewName"></span>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-warning px-4">
+              <i class="bi bi-save me-1"></i>Salva modifiche
+            </button>
+            <a href="{{ url_for('documents.list_documents') }}" class="btn btn-outline-secondary">Annulla</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+  document.querySelector('input[type="file"]').addEventListener('change', function() {
+    const preview = document.getElementById('filePreview');
+    const name = document.getElementById('filePreviewName');
+    if (this.files.length > 0) {
+      name.textContent = this.files[0].name + ' (' + (this.files[0].size / 1024).toFixed(0) + ' KB)';
+      preview.classList.remove('d-none');
+    } else {
+      preview.classList.add('d-none');
+    }
+  });
+</script>
+{% endblock %}
+{% endblock %}

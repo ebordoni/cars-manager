@@ -95,6 +95,7 @@ def upload_document():
             original_name=original_name,
             file_size=file_size,
             notes=request.form.get("notes", "").strip() or None,
+            cost=request.form.get("cost", type=float) or None,
         )
         flash("Documento caricato con successo!", "success")
         return redirect(url_for("documents.list_documents"))
@@ -118,6 +119,71 @@ def download_document(doc_id):
         doc["filename"],
         as_attachment=True,
         download_name=doc["original_name"],
+    )
+
+
+@documents_bp.route("/<int:doc_id>/edit", methods=["GET", "POST"])
+def edit_document(doc_id):
+    doc = db.get_document(doc_id)
+    if not doc:
+        abort(404)
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        if not title:
+            flash("Il titolo è obbligatorio.", "danger")
+            return render_template(
+                "documents/edit.html",
+                doc=doc,
+                doc_types=DOC_TYPES,
+            )
+
+        file = request.files.get("file")
+        new_filename = None
+        new_original_name = None
+        new_file_size = None
+
+        if file and file.filename != "":
+            if not _allowed_file(file.filename):
+                flash(
+                    f"Tipo di file non consentito. Formati accettati: {', '.join(ALLOWED_EXTENSIONS)}",
+                    "danger",
+                )
+                return render_template(
+                    "documents/edit.html",
+                    doc=doc,
+                    doc_types=DOC_TYPES,
+                )
+            new_original_name = secure_filename(file.filename)
+            ext = new_original_name.rsplit(".", 1)[1].lower()
+            new_filename = f"{uuid.uuid4().hex}.{ext}"
+            upload_folder = current_app.config["UPLOAD_FOLDER"]
+            os.makedirs(upload_folder, exist_ok=True)
+            save_path = os.path.join(upload_folder, new_filename)
+            file.save(save_path)
+            new_file_size = os.path.getsize(save_path)
+            # Remove old file
+            old_path = os.path.join(upload_folder, doc["filename"])
+            if os.path.exists(old_path):
+                os.remove(old_path)
+
+        db.update_document(
+            doc_id=doc_id,
+            doc_type=request.form.get("type", "altro"),
+            title=title,
+            notes=request.form.get("notes", "").strip() or None,
+            cost=request.form.get("cost", type=float) or None,
+            filename=new_filename,
+            original_name=new_original_name,
+            file_size=new_file_size,
+        )
+        flash("Documento aggiornato con successo!", "success")
+        return redirect(url_for("documents.list_documents"))
+
+    return render_template(
+        "documents/edit.html",
+        doc=doc,
+        doc_types=DOC_TYPES,
     )
 
 
