@@ -54,7 +54,7 @@
 
         <ul class="list-unstyled small text-muted mb-3">
           {% if c.address %}
-          <li class="mb-1"><i class="bi bi-geo-alt me-2 text-muted"></i>{{ c.address }}</li>
+          <li class="mb-1 text-truncate" title="{{ c.address }}"><i class="bi bi-geo-alt me-2 text-muted"></i>{{ c.address }}</li>
           {% endif %}
           {% if c.phone %}
           <li class="mb-1">

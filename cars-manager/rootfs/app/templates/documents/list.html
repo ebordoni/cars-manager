@@ -63,9 +63,9 @@
           {% else %}
           <i class="bi bi-file-earmark fs-2 doc-icon-other mt-1"></i>
           {% endif %}
-          <div class="flex-grow-1 min-w-0">
+          <div class="flex-grow-1 min-w-0 overflow-hidden">
             <div class="fw-semibold text-truncate" title="{{ doc.title }}">{{ doc.title }}</div>
-            <small class="text-muted">{{ doc.make }} {{ doc.model }}</small>
+            <small class="text-muted d-block text-truncate">{{ doc.make }} {{ doc.model }}</small>
           </div>
         </div>
         <div class="d-flex flex-wrap gap-1 mb-3">
@@ -82,9 +82,9 @@
           </span>
           {% endif %}
         </div>
-        <small class="text-muted mb-3">{{ doc.original_name }}</small>
+        <small class="text-muted mb-3 d-block text-truncate" title="{{ doc.original_name }}">{{ doc.original_name }}</small>
         {% if doc.notes %}
-        <small class="text-muted fst-italic mb-3">{{ doc.notes }}</small>
+        <small class="text-muted fst-italic mb-3 d-block text-truncate" title="{{ doc.notes }}">{{ doc.notes }}</small>
         {% endif %}
         <div class="mt-auto d-flex gap-2">
           <a href="{{ url_for('documents.download_document', doc_id=doc.id) }}"

@@ -7,6 +7,16 @@ e questo progetto segue il [Versionamento Semantico](https://semver.org/lang/it/
 
 ---
 
+## [1.0.7] - 2026-05-26
+
+### Corretto
+
+- Testi lunghi nelle tile/card non escono più dal box: applicato `text-truncate` su titoli, nomi file, note e indirizzi in tutte le sezioni (Documenti, Guasti, Auto, Contatti)
+- Aggiunto attributo `title=` ai testi troncati per mostrare il testo completo al passaggio del mouse
+- Corretto overflow del titolo nella card Documenti aggiungendo `overflow-hidden` al contenitore flex
+
+---
+
 ## [1.0.6] - 2026-05-26
 
 ### Aggiunto

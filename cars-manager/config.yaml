@@ -2,7 +2,7 @@ name: "Cars Manager"
 description: >-
   Gestione del garage di famiglia: manutenzioni, scadenze, documenti,
   segnalazione guasti, reportistica e invio preventivi via email.
-version: "1.0.6"
+version: "1.0.7"
 slug: "cars_manager"
 init: false
 arch:

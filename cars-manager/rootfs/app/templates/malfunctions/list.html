@@ -57,15 +57,15 @@
         </div>
 
         <!-- Content -->
-        <div class="flex-grow-1">
-          <div class="fw-bold">{{ f.title }}</div>
+        <div class="flex-grow-1 min-w-0 overflow-hidden">
+          <div class="fw-bold text-truncate" title="{{ f.title }}">{{ f.title }}</div>
           <small class="text-muted">
             {{ f.make }} {{ f.model }}
             {% if f.license_plate %}· {{ f.license_plate }}{% endif %}
             · segnalato {{ f.date_reported }}
           </small>
           {% if f.description %}
-          <p class="mb-0 mt-1 text-muted small text-truncate" style="max-width:500px">{{ f.description }}</p>
+          <p class="mb-0 mt-1 text-muted small text-truncate">{{ f.description }}</p>
           {% endif %}
         </div>
 

@@ -1,7 +1,7 @@
 # CARS_M – Gestione Autovetture di Famiglia
 
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Addon-blue?logo=home-assistant)](https://www.home-assistant.io/)
-[![Version](https://img.shields.io/badge/version-1.0.6-green)](cars-manager/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.7-green)](cars-manager/CHANGELOG.md)
 
 Repository di addon per Home Assistant per la gestione completa delle autovetture di famiglia.
 
@@ -11,7 +11,7 @@ Repository di addon per Home Assistant per la gestione completa delle autovettur
 
 | Addon                         | Versione | Descrizione                                                 |
 | ----------------------------- | -------- | ----------------------------------------------------------- |
-| [Cars Manager](cars-manager/) | 1.0.6    | Gestione garage, scadenze, documenti, guasti e reportistica |
+| [Cars Manager](cars-manager/) | 1.0.7    | Gestione garage, scadenze, documenti, guasti e reportistica |
 
 ---
 
